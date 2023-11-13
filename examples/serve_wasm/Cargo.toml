@@ -1,0 +1,15 @@
+[package]
+name = "serve_wasm"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+hyper = { version = "0.14", features = ["http1", "server", "tcp"] }
+tokio = { version = "1", default-features = false, features = ["rt"] }
+
+[dev-dependencies]
+greet = { path = "greet" }
+
+[build-dependencies]
+mei = { path = "../../mei" }
+sailfish = { version = "0.8", default-features = false, features = ["derive"] }
