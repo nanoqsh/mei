@@ -48,7 +48,7 @@ impl Cargo {
             path.push(target);
         }
 
-        path.push(self.profile);
+        path.push(self.profile.target_dir_name());
         path.push(artifact.name());
         path
     }

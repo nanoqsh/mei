@@ -9,6 +9,10 @@ pub enum OptLevel {
 }
 
 impl OptLevel {
+    pub fn is_optimized() -> bool {
+        Self::current() > Self::N0
+    }
+
     pub(crate) fn from_str(s: &str) -> Option<Self> {
         match s {
             "0" => Some(Self::N0),

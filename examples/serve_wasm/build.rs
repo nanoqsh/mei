@@ -11,7 +11,7 @@ fn main() {
         .manifest("greet")
         .target(Target::WASM32_UNKNOWN_UNKNOWN);
 
-    if OptLevel::current() > OptLevel::N1 {
+    if OptLevel::is_optimized() {
         make_greet = make_greet.profile("production");
     }
 
@@ -37,7 +37,7 @@ fn main() {
     });
 
     let greet_bg_path = js_dir.join("greet_bg.wasm");
-    if cfg!(feature = "wasm-opt") && OptLevel::current() > OptLevel::N1 {
+    if cfg!(feature = "wasm-opt") && OptLevel::is_optimized() {
         // > wasm-opt -Os {greet_bg_path} -o static/greet_bg.wasm
         mei::tool("wasm-opt")
             .arg("-Os")

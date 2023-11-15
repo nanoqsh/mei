@@ -6,6 +6,13 @@ impl Profile {
     pub const TEST: Self = Self("test");
     pub const BENCH: Self = Self("bench");
     pub const RELEASE: Self = Self("release");
+
+    pub(crate) fn target_dir_name(self) -> &'static str {
+        match self {
+            Self::DEV => "debug",
+            Self(s) => s,
+        }
+    }
 }
 
 impl Default for Profile {
@@ -23,15 +30,5 @@ impl From<&'static str> for Profile {
 impl PartialEq<str> for Profile {
     fn eq(&self, other: &str) -> bool {
         self.0 == other
-    }
-}
-
-impl<S> AsRef<S> for Profile
-where
-    str: AsRef<S>,
-    S: ?Sized,
-{
-    fn as_ref(&self) -> &S {
-        self.0.as_ref()
     }
 }

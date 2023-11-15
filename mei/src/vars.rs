@@ -1,5 +1,5 @@
 use {
-    crate::cargo::{OptLevel, Profile},
+    crate::cargo::OptLevel,
     std::{
         path::{Path, PathBuf},
         sync::OnceLock,
@@ -12,12 +12,6 @@ impl OptLevel {
     }
 }
 
-impl Profile {
-    pub fn current() -> Self {
-        Self(&Vars::get().profile)
-    }
-}
-
 pub fn subdir(name: &str) -> PathBuf {
     let vars = Vars::get();
     vars.target_dir.join(name)
@@ -25,16 +19,14 @@ pub fn subdir(name: &str) -> PathBuf {
 
 pub(crate) struct Vars {
     opt_level: OptLevel,
-    profile: String,
     target_dir: PathBuf,
     mei_dir: OnceLock<PathBuf>,
 }
 
 impl Vars {
     fn new() -> Self {
-        let profile = var("PROFILE");
         let out_dir = PathBuf::from(var("OUT_DIR"));
-        let Some(target_dir) = get_target_dir(&out_dir, Path::new(&profile)) else {
+        let Some(target_dir) = get_target_dir(&out_dir) else {
             panic!("failed to find target directory");
         };
 
@@ -48,7 +40,6 @@ impl Vars {
 
         Self {
             opt_level,
-            profile,
             target_dir,
             mei_dir: OnceLock::new(),
         }
@@ -69,17 +60,19 @@ impl Vars {
     }
 }
 
-fn get_target_dir(out_dir: &Path, profile: &Path) -> Option<PathBuf> {
-    let mut curr = out_dir;
-    while let Some(parent) = curr.parent() {
-        if parent.ends_with(profile) {
-            return Some(parent.parent()?.to_path_buf());
-        }
+/// Returns the target directory.
+///
+/// Currently there is no direct way to get the path, so a workaround is used.
+/// The problem discussion: https://github.com/rust-lang/cargo/issues/9661
+fn get_target_dir(mut current: &Path) -> Option<PathBuf> {
+    let skip_triple = var("TARGET") == var("HOST");
+    let skip_parent_dirs = if skip_triple { 4 } else { 5 };
 
-        curr = parent;
+    for _ in 0..skip_parent_dirs {
+        current = current.parent()?;
     }
 
-    None
+    Some(PathBuf::from(current))
 }
 
 fn var(key: &str) -> String {
