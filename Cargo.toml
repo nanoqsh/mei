@@ -1,6 +1,6 @@
 [workspace]
 resolver = "2"
-members = ["mei", "examples/serve_wasm"]
+members = ["mei", "examples/build_wasm_bindgen"]
 
 [profile.production]
 inherits = "release"
