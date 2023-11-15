@@ -1,11 +1,9 @@
-type Route = (&'static str, Page);
-
 pub fn run(routes: &'static [Route]) {
     use {
         http_body_util::Full,
         hyper::{
-            body::Incoming, header, http::HeaderValue, server::conn::http1, service, Method,
-            Request, Response, StatusCode,
+            header, http::HeaderValue, server::conn::http1, service, Method, Request, Response,
+            StatusCode,
         },
         hyper_util::rt::TokioIo,
         std::{
@@ -18,19 +16,14 @@ pub fn run(routes: &'static [Route]) {
     };
 
     let routes = {
-        let routes: HashMap<_, _> = routes.iter().map(|(s, p)| (*s, p)).collect();
+        let routes: HashMap<_, _> = routes.iter().copied().collect();
         Arc::new(routes)
     };
 
-    let page = move |req: Request<Incoming>| {
-        let mut not_found = Response::default();
-        *not_found.status_mut() = StatusCode::NOT_FOUND;
-
-        if req.method() != Method::GET {
-            return not_found;
-        }
-
-        let Some(page) = routes.get(req.uri().path()) else {
+    let page = move |req: Request<_>| {
+        let (&Method::GET, Some(page)) = (req.method(), routes.get(req.uri().path())) else {
+            let mut not_found = Response::default();
+            *not_found.status_mut() = StatusCode::NOT_FOUND;
             return not_found;
         };
 
@@ -54,11 +47,10 @@ pub fn run(routes: &'static [Route]) {
 
         loop {
             let stream = match listener.accept().await {
-                Ok((stream, _)) => stream,
+                Ok((stream, _)) => TokioIo::new(stream),
                 Err(err) => return err,
             };
 
-            let io = TokioIo::new(stream);
             let serve = service::service_fn({
                 let page = page.clone();
                 move |req| {
@@ -67,8 +59,8 @@ pub fn run(routes: &'static [Route]) {
                 }
             });
 
-            task::spawn(async move {
-                if let Err(err) = http1::Builder::new().serve_connection(io, serve).await {
+            task::spawn(async {
+                if let Err(err) = http1::Builder::new().serve_connection(stream, serve).await {
                     eprintln!("connection error: {err}");
                 }
             });
@@ -84,6 +76,9 @@ pub fn run(routes: &'static [Route]) {
     }
 }
 
+type Route = (&'static str, Page);
+
+#[derive(Clone, Copy)]
 pub struct Page {
     content_type: &'static str,
     body: &'static [u8],
