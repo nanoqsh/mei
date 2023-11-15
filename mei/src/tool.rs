@@ -7,6 +7,7 @@ where
     Tool::new(name.into())
 }
 
+#[must_use]
 pub struct Tool {
     name: Box<str>,
     args: Vec<Box<OsStr>>,

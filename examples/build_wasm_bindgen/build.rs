@@ -29,7 +29,7 @@ fn main() {
         .spawn();
 
     let js_path = js_dir.join("greet.js");
-    let js = mei::read_to_string(&js_path);
+    let js = mei::read_to_string(js_path);
 
     mei::write("static/index.html", {
         let index = Index { js };

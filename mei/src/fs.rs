@@ -6,9 +6,10 @@ where
 {
     fn create_dir_impl(dir: &Path) {
         if let Err(err) = fs::create_dir(dir) {
-            if err.kind() != ErrorKind::AlreadyExists {
-                panic!("failed to create {dir:?}: {err}");
-            }
+            assert!(
+                err.kind() == ErrorKind::AlreadyExists,
+                "failed to create {dir:?}: {err}",
+            );
         }
     }
 

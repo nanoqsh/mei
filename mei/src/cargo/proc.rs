@@ -12,6 +12,7 @@ pub fn cargo() -> Cargo {
     Cargo::default()
 }
 
+#[must_use]
 #[derive(Default)]
 pub struct Cargo {
     profile: Profile,
@@ -80,7 +81,7 @@ impl Spawn for Cargo {
 
         cargo
             .arg("--target-dir")
-            .arg(&target_dir)
+            .arg(target_dir)
             .stdout(Stdio::piped())
             .stderr(Stdio::piped());
 

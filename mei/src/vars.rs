@@ -63,7 +63,7 @@ impl Vars {
 /// Returns the target directory.
 ///
 /// Currently there is no direct way to get the path, so a workaround is used.
-/// The problem discussion: https://github.com/rust-lang/cargo/issues/9661
+/// The problem discussion: <https://github.com/rust-lang/cargo/issues/9661>
 fn get_target_dir(mut current: &Path) -> Option<PathBuf> {
     let skip_triple = var("TARGET") == var("HOST");
     let skip_parent_dirs = if skip_triple { 4 } else { 5 };

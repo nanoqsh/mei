@@ -1,0 +1,10 @@
+[package]
+name = "file_server"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+http-body-util = "0.1"
+hyper = { version = "1.0", features = ["http1", "server"] }
+hyper-util = { git = "https://github.com/hyperium/hyper-util.git" }
+tokio = { version = "1", default-features = false, features = ["rt"] }
