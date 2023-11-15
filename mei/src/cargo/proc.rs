@@ -14,11 +14,20 @@ pub fn cargo() -> Cargo {
 
 #[derive(Default)]
 pub struct Cargo {
+    profile: Profile,
     target: Option<Target>,
     manifest: Option<Manifest>,
 }
 
 impl Cargo {
+    pub fn profile<P>(mut self, profile: P) -> Self
+    where
+        P: Into<Profile>,
+    {
+        self.profile = profile.into();
+        self
+    }
+
     pub fn target(mut self, target: Target) -> Self {
         self.target = Some(target);
         self
@@ -39,7 +48,7 @@ impl Cargo {
             path.push(target);
         }
 
-        path.push(Profile::current());
+        path.push(self.profile);
         path.push(artifact.name());
         path
     }
@@ -51,6 +60,13 @@ impl Spawn for Cargo {
 
         let mut cargo = Command::new("cargo");
         cargo.arg("build");
+
+        match self.profile {
+            Profile::DEV => {} // default cargo profile
+            Profile::RELEASE => _ = cargo.arg("--release"),
+            Profile(profile) => _ = cargo.args(["--profile", profile]),
+        }
+
         if let Some(Target(target)) = self.target {
             cargo.args(["--target", target]);
         }

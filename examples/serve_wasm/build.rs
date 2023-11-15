@@ -11,6 +11,10 @@ fn main() {
         .manifest("greet")
         .target(Target::WASM32_UNKNOWN_UNKNOWN);
 
+    if OptLevel::current() > OptLevel::N1 {
+        make_greet = make_greet.profile("production");
+    }
+
     make_greet.spawn();
     let greet = mei::artifact("greet.wasm");
     let js_dir = mei::subdir("js");
