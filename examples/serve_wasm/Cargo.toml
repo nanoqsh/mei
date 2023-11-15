@@ -13,3 +13,6 @@ greet = { path = "greet" }
 [build-dependencies]
 mei = { path = "../../mei" }
 sailfish = { version = "0.8", default-features = false, features = ["derive"] }
+
+[features]
+wasm-opt = []
