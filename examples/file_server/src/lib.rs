@@ -20,20 +20,21 @@ pub fn run(routes: &'static [Route]) {
         Arc::new(routes)
     };
 
-    let page = move |req: Request<_>| {
-        let (&Method::GET, Some(page)) = (req.method(), routes.get(req.uri().path())) else {
-            let mut not_found = Response::default();
-            *not_found.status_mut() = StatusCode::NOT_FOUND;
-            return not_found;
-        };
+    let page = move |req: Request<_>| match (req.method(), routes.get(req.uri().path())) {
+        (&Method::GET, Some(page)) => {
+            let mut res = Response::new(Full::new(page.body));
+            res.headers_mut().insert(
+                header::CONTENT_TYPE,
+                HeaderValue::from_static(page.content_type),
+            );
 
-        let mut res = Response::new(Full::new(page.body));
-        res.headers_mut().insert(
-            header::CONTENT_TYPE,
-            HeaderValue::from_static(page.content_type),
-        );
-
-        res
+            res
+        }
+        _ => {
+            let mut res = Response::default();
+            *res.status_mut() = StatusCode::NOT_FOUND;
+            res
+        }
     };
 
     let run = || async {

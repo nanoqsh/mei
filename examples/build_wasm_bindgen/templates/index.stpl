@@ -8,8 +8,8 @@
 
 <body>
     <h1 id="text"></h1>
-    <script><%- js %></script>
-    <script>
+    <script async><%- js %></script>
+    <script async>
         const run = async () => {
             await wasm_bindgen('greet_bg.wasm');
             const { greet } = wasm_bindgen;
