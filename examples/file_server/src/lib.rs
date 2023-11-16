@@ -28,13 +28,15 @@ pub fn run(routes: &'static [Route]) {
                 HeaderValue::from_static(page.content_type),
             );
 
-            res
+            Some(res)
         }
-        _ => {
-            let mut res = Response::default();
-            *res.status_mut() = StatusCode::NOT_FOUND;
-            res
-        }
+        _ => None,
+    };
+
+    let no_found = || {
+        let mut res = Response::default();
+        *res.status_mut() = StatusCode::NOT_FOUND;
+        res
     };
 
     let run = || async {
@@ -55,7 +57,7 @@ pub fn run(routes: &'static [Route]) {
             let serve = service::service_fn({
                 let page = page.clone();
                 move |req| {
-                    let res = page(req);
+                    let res = page(req).unwrap_or_else(no_found);
                     async { Ok::<_, Infallible>(res) }
                 }
             });
