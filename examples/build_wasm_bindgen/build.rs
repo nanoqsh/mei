@@ -7,12 +7,13 @@ fn main() {
     // TODO
     println!("cargo:rerun-if-changed=.");
 
-    let mut make_greet = mei::cargo()
+    let mut make_greet = mei::cargo();
+    make_greet
         .manifest("greet")
         .target(Target::WASM32_UNKNOWN_UNKNOWN);
 
     if OptLevel::is_optimized() {
-        make_greet = make_greet.profile("production");
+        make_greet.profile("production");
     }
 
     make_greet.spawn();

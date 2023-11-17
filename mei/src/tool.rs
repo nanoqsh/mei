@@ -18,7 +18,7 @@ impl Tool {
         Self { name, args: vec![] }
     }
 
-    pub fn arg<S>(mut self, arg: S) -> Self
+    pub fn arg<S>(&mut self, arg: S) -> &mut Self
     where
         S: AsRef<OsStr>,
     {
@@ -26,7 +26,7 @@ impl Tool {
         self
     }
 
-    pub fn args<I, S>(mut self, args: I) -> Self
+    pub fn args<I, S>(&mut self, args: I) -> &mut Self
     where
         I: IntoIterator<Item = S>,
         S: AsRef<OsStr>,

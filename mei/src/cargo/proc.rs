@@ -21,7 +21,7 @@ pub struct Cargo {
 }
 
 impl Cargo {
-    pub fn profile<P>(mut self, profile: P) -> Self
+    pub fn profile<P>(&mut self, profile: P) -> &mut Self
     where
         P: Into<Profile>,
     {
@@ -29,12 +29,12 @@ impl Cargo {
         self
     }
 
-    pub fn target(mut self, target: Target) -> Self {
+    pub fn target(&mut self, target: Target) -> &mut Self {
         self.target = Some(target);
         self
     }
 
-    pub fn manifest<S>(mut self, manifest: S) -> Self
+    pub fn manifest<S>(&mut self, manifest: S) -> &mut Self
     where
         S: Into<Manifest>,
     {
