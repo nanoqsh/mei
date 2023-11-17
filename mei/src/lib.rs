@@ -1,5 +1,7 @@
 mod artifact;
 mod fs;
+mod log;
+mod mei;
 mod spawn;
 mod tool;
 mod vars;

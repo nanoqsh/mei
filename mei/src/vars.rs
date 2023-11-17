@@ -1,5 +1,5 @@
 use {
-    crate::cargo::OptLevel,
+    crate::{cargo::OptLevel, mei::Mei},
     std::{
         path::{Path, PathBuf},
         sync::OnceLock,
@@ -8,13 +8,12 @@ use {
 
 impl OptLevel {
     pub fn current() -> Self {
-        Vars::get().opt_level
+        Mei::get().vars().opt_level
     }
 }
 
 pub fn subdir(name: &str) -> PathBuf {
-    let vars = Vars::get();
-    vars.target_dir.join(name)
+    Mei::get().vars().target_dir.join(name)
 }
 
 pub(crate) struct Vars {
@@ -24,7 +23,7 @@ pub(crate) struct Vars {
 }
 
 impl Vars {
-    fn new() -> Self {
+    pub fn new() -> Self {
         let out_dir = PathBuf::from(var("OUT_DIR"));
         let Some(target_dir) = get_target_dir(&out_dir) else {
             panic!("failed to find target directory");
@@ -43,12 +42,6 @@ impl Vars {
             target_dir,
             mei_dir: OnceLock::new(),
         }
-    }
-
-    pub fn get() -> &'static Self {
-        static VARS: OnceLock<Vars> = OnceLock::new();
-
-        VARS.get_or_init(Self::new)
     }
 
     pub fn make_mei_dir(&self) -> &Path {

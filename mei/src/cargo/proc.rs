@@ -2,8 +2,8 @@ use {
     crate::{
         artifact::Artifact,
         cargo::{Manifest, Profile, Target},
+        mei::Mei,
         spawn::Spawn,
-        vars::Vars,
     },
     std::path::PathBuf,
 };
@@ -43,8 +43,7 @@ impl Cargo {
     }
 
     pub fn path_of(&self, artifact: &Artifact) -> PathBuf {
-        let vars = Vars::get();
-        let mut path = vars.make_mei_dir().to_owned();
+        let mut path = Mei::get().vars().make_mei_dir().to_owned();
         if let Some(Target(target)) = self.target {
             path.push(target);
         }
@@ -76,14 +75,18 @@ impl Spawn for Cargo {
             cargo.arg("--manifest-path").arg(manifest);
         }
 
-        let vars = Vars::get();
-        let target_dir = vars.make_mei_dir();
+        let mei = Mei::get();
+        let target_dir = mei.vars().make_mei_dir();
+        let stderr = match mei.log().stdio() {
+            Ok(log) => log,
+            Err(err) => panic!("failed to pipe stderr: {err}"),
+        };
 
         cargo
             .arg("--target-dir")
             .arg(target_dir)
             .stdout(Stdio::piped())
-            .stderr(Stdio::piped());
+            .stderr(stderr);
 
         Spawn::spawn(&mut cargo);
     }
