@@ -1,28 +1,27 @@
-use {crate::spawn::Spawn, std::ffi::OsStr};
+use {
+    crate::spawn::Spawn,
+    std::{
+        ffi::OsStr,
+        process::{Command, Stdio},
+    },
+};
 
-pub fn tool<N>(name: N) -> Tool
+pub fn tool<S>(name: S) -> Tool
 where
-    N: Into<Box<str>>,
+    S: AsRef<OsStr>,
 {
-    Tool::new(name.into())
+    Tool(Command::new(name))
 }
 
 #[must_use]
-pub struct Tool {
-    name: Box<str>,
-    args: Vec<Box<OsStr>>,
-}
+pub struct Tool(Command);
 
 impl Tool {
-    fn new(name: Box<str>) -> Self {
-        Self { name, args: vec![] }
-    }
-
     pub fn arg<S>(&mut self, arg: S) -> &mut Self
     where
         S: AsRef<OsStr>,
     {
-        self.args.push(Box::from(arg.as_ref()));
+        self.0.arg(arg);
         self
     }
 
@@ -31,24 +30,33 @@ impl Tool {
         I: IntoIterator<Item = S>,
         S: AsRef<OsStr>,
     {
-        self.args
-            .extend(args.into_iter().map(|arg| Box::from(arg.as_ref())));
-
+        self.0.args(args);
         self
+    }
+
+    pub fn stdout<S>(&mut self, stdout: S) -> &mut Self
+    where
+        S: Into<Stdio>,
+    {
+        self.0.stdout(stdout);
+        self
+    }
+
+    pub fn stderr<S>(&mut self, stderr: S) -> &mut Self
+    where
+        S: Into<Stdio>,
+    {
+        self.0.stderr(stderr);
+        self
+    }
+
+    pub fn into_command(self) -> Command {
+        self.0
     }
 }
 
 impl Spawn for Tool {
     fn spawn(&mut self) {
-        use std::process::{Command, Stdio};
-
-        let Self { name, args } = self;
-        let mut proc = Command::new(&name[..]);
-        for arg in args {
-            proc.arg(arg);
-        }
-
-        proc.stdout(Stdio::piped()).stderr(Stdio::piped());
-        Spawn::spawn(&mut proc);
+        Spawn::spawn(&mut self.0);
     }
 }
