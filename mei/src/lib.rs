@@ -1,4 +1,5 @@
 mod artifact;
+mod config;
 mod fs;
 mod log;
 mod mei;

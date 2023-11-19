@@ -1,5 +1,5 @@
 use {
-    crate::{log::Log, vars::Vars},
+    crate::{config::Config, log::Log, vars::Vars},
     std::sync::OnceLock,
 };
 
@@ -11,8 +11,10 @@ pub(crate) struct Mei {
 
 impl Mei {
     fn new() -> Self {
+        let conf = Config::load();
+
         Self {
-            verbose: false,
+            verbose: conf.verbose,
             log: match Log::new() {
                 Ok(log) => log,
                 Err(err) => panic!("failed to create the log: {err}"),
