@@ -5,7 +5,7 @@ use {
         mei::Mei,
         spawn::{self, Info, Spawn},
     },
-    std::path::PathBuf,
+    std::{borrow::Cow, path::PathBuf},
 };
 
 pub fn cargo() -> Cargo {
@@ -71,10 +71,11 @@ impl Spawn for Cargo {
             cargo.args(["--target", target]);
         }
 
-        let name = self.manifest.as_ref().map(|manifest| {
+        let mut name = Cow::default();
+        if let Some(manifest) = &self.manifest {
             cargo.arg("--manifest-path").arg(manifest.path());
-            manifest.as_str()
-        });
+            name = manifest.to_str();
+        }
 
         let mei = Mei::get();
         let target_dir = mei.vars().make_mei_dir();
@@ -89,6 +90,11 @@ impl Spawn for Cargo {
             .stdout(Stdio::piped())
             .stderr(stderr);
 
-        spawn::spawn_process(&mut cargo, Info::Building { name });
+        spawn::spawn_process(
+            &mut cargo,
+            Info::Building {
+                name: name.as_ref(),
+            },
+        );
     }
 }

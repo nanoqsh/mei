@@ -6,7 +6,7 @@ use {
 #[derive(Clone, Copy)]
 pub enum Info<'a> {
     Running,
-    Building { name: Option<&'a str> },
+    Building { name: &'a str },
 }
 
 impl Info<'_> {
@@ -16,7 +16,7 @@ impl Info<'_> {
         _ = match self {
             Self::Running => log.running(&DisplayCommand {
                 cmd,
-                name: None,
+                name: "",
                 verbose: mei.verbose(),
             }),
             Self::Building { name } => log.building(&DisplayCommand {
@@ -66,23 +66,18 @@ pub fn spawn_process(cmd: &mut Command, info: Info) {
 
 struct DisplayCommand<'a> {
     cmd: &'a Command,
-    name: Option<&'a str>,
+    name: &'a str,
     verbose: bool,
 }
 
 impl fmt::Display for DisplayCommand<'_> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        match self.name {
-            Some(name) if self.verbose => {
-                write!(f, "{name}: ")?;
-                let proc = self.cmd.get_program().to_string_lossy();
-                write!(f, "{proc}")?;
-            }
-            Some(name) => write!(f, "{name}")?,
-            None => {
-                let proc = self.cmd.get_program().to_string_lossy();
-                write!(f, "{proc}")?;
-            }
+        let name = self.name;
+        if self.verbose || name.trim().is_empty() {
+            let proc = self.cmd.get_program().to_string_lossy();
+            write!(f, "{proc}")?;
+        } else {
+            write!(f, "{name}")?;
         }
 
         if self.verbose {

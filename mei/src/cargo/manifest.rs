@@ -1,27 +1,36 @@
-use std::path::PathBuf;
+use std::{
+    borrow::Cow,
+    path::{Path, PathBuf},
+};
 
-pub struct Manifest(String);
+pub struct Manifest(PathBuf);
 
 impl Manifest {
-    pub fn path(&self) -> PathBuf {
-        let mut path = PathBuf::from(&self.0);
+    fn new(mut path: PathBuf) -> Self {
         if path.is_dir() {
             path.push("Cargo.toml");
         }
 
-        path
+        Self(path)
     }
 
-    pub fn as_str(&self) -> &str {
+    pub fn path(&self) -> &Path {
         &self.0
+    }
+
+    pub fn to_str(&self) -> Cow<str> {
+        self.0
+            .parent()
+            .map(Path::to_string_lossy)
+            .unwrap_or_default()
     }
 }
 
 impl<S> From<S> for Manifest
 where
-    S: Into<String>,
+    S: Into<PathBuf>,
 {
     fn from(name: S) -> Self {
-        Self(name.into())
+        Self::new(name.into())
     }
 }
