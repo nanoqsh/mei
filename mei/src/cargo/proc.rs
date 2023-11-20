@@ -3,7 +3,7 @@ use {
         artifact::Artifact,
         cargo::{Manifest, Profile, Target},
         mei::Mei,
-        spawn::Spawn,
+        spawn::{Info, Process, Spawn},
     },
     std::path::PathBuf,
 };
@@ -71,9 +71,10 @@ impl Spawn for Cargo {
             cargo.args(["--target", target]);
         }
 
-        if let Some(Manifest(manifest)) = &self.manifest {
-            cargo.arg("--manifest-path").arg(manifest);
-        }
+        let name = self.manifest.as_ref().map(|manifest| {
+            cargo.arg("--manifest-path").arg(manifest.path());
+            manifest.as_str()
+        });
 
         let mei = Mei::get();
         let target_dir = mei.vars().make_mei_dir();
@@ -88,6 +89,11 @@ impl Spawn for Cargo {
             .stdout(Stdio::piped())
             .stderr(stderr);
 
-        Spawn::spawn(&mut cargo);
+        let mut proc = Process {
+            cmd: &mut cargo,
+            info: Info::Building { name },
+        };
+
+        proc.spawn();
     }
 }

@@ -3,25 +3,60 @@ use {
     std::{ffi::OsStr, fmt, process::Command},
 };
 
+#[derive(Clone, Copy)]
+pub enum Info<'a> {
+    Running,
+    Building { name: Option<&'a str> },
+}
+
+impl Info<'_> {
+    fn log(self, cmd: &Command) {
+        let mei = Mei::get();
+        let log = mei.log();
+        _ = match self {
+            Info::Running => log.running(&DisplayCommand {
+                cmd,
+                name: None,
+                verbose: mei.verbose(),
+            }),
+            Info::Building { name } => log.building(&DisplayCommand {
+                cmd,
+                name,
+                verbose: mei.verbose(),
+            }),
+        };
+    }
+}
+
 pub trait Spawn {
     fn spawn(&mut self);
 }
 
 impl Spawn for Command {
     fn spawn(&mut self) {
-        let mei = Mei::get();
-        let log = mei.log();
-        _ = log.running(&FormatProc {
+        let mut proc = Process {
             cmd: self,
-            verbose: mei.verbose(),
-        });
+            info: Info::Running,
+        };
 
-        match self.spawn() {
+        proc.spawn();
+    }
+}
+
+pub struct Process<'a> {
+    pub cmd: &'a mut Command,
+    pub info: Info<'a>,
+}
+
+impl Process<'_> {
+    pub fn spawn(&mut self) {
+        self.info.log(self.cmd);
+        match self.cmd.spawn() {
             Ok(child) => {
                 let out = match child.wait_with_output() {
                     Ok(out) => out,
                     Err(err) => {
-                        let name = self.get_program().to_string_lossy();
+                        let name = self.cmd.get_program().to_string_lossy();
                         panic!("failed to wait the output from {name} process: {err}");
                     }
                 };
@@ -34,22 +69,33 @@ impl Spawn for Command {
                 panic!("run failed:\n{stderr}\n");
             }
             Err(err) => {
-                let name = self.get_program().to_string_lossy();
+                let name = self.cmd.get_program().to_string_lossy();
                 panic!("failed to spawn {name} process: {err}");
             }
         }
     }
 }
 
-struct FormatProc<'a> {
+struct DisplayCommand<'a> {
     cmd: &'a Command,
+    name: Option<&'a str>,
     verbose: bool,
 }
 
-impl fmt::Display for FormatProc<'_> {
+impl fmt::Display for DisplayCommand<'_> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        let proc = self.cmd.get_program().to_string_lossy();
-        write!(f, "{proc}")?;
+        match self.name {
+            Some(name) if self.verbose => {
+                write!(f, "{name}: ")?;
+                let proc = self.cmd.get_program().to_string_lossy();
+                write!(f, "{proc}")?;
+            }
+            Some(name) => write!(f, "{name}")?,
+            None => {
+                let proc = self.cmd.get_program().to_string_lossy();
+                write!(f, "{proc}")?;
+            }
+        }
 
         if self.verbose {
             for arg in self.cmd.get_args().map(OsStr::to_string_lossy) {
