@@ -1,5 +1,5 @@
 use {
-    crate::spawn::{Info, Process, Spawn},
+    crate::spawn::{self, Info, Spawn},
     std::{
         ffi::OsStr,
         process::{Command, Stdio},
@@ -57,11 +57,6 @@ impl Tool {
 
 impl Spawn for Tool {
     fn spawn(&mut self) {
-        let mut proc = Process {
-            cmd: &mut self.0,
-            info: Info::Running,
-        };
-
-        proc.spawn();
+        spawn::spawn_process(&mut self.0, Info::Running);
     }
 }

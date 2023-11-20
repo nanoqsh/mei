@@ -3,7 +3,7 @@ use {
         artifact::Artifact,
         cargo::{Manifest, Profile, Target},
         mei::Mei,
-        spawn::{Info, Process, Spawn},
+        spawn::{self, Info, Spawn},
     },
     std::path::PathBuf,
 };
@@ -89,11 +89,6 @@ impl Spawn for Cargo {
             .stdout(Stdio::piped())
             .stderr(stderr);
 
-        let mut proc = Process {
-            cmd: &mut cargo,
-            info: Info::Building { name },
-        };
-
-        proc.spawn();
+        spawn::spawn_process(&mut cargo, Info::Building { name });
     }
 }

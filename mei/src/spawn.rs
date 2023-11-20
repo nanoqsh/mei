@@ -14,12 +14,12 @@ impl Info<'_> {
         let mei = Mei::get();
         let log = mei.log();
         _ = match self {
-            Info::Running => log.running(&DisplayCommand {
+            Self::Running => log.running(&DisplayCommand {
                 cmd,
                 name: None,
                 verbose: mei.verbose(),
             }),
-            Info::Building { name } => log.building(&DisplayCommand {
+            Self::Building { name } => log.building(&DisplayCommand {
                 cmd,
                 name,
                 verbose: mei.verbose(),
@@ -34,44 +34,32 @@ pub trait Spawn {
 
 impl Spawn for Command {
     fn spawn(&mut self) {
-        let mut proc = Process {
-            cmd: self,
-            info: Info::Running,
-        };
-
-        proc.spawn();
+        spawn_process(self, Info::Running);
     }
 }
 
-pub struct Process<'a> {
-    pub cmd: &'a mut Command,
-    pub info: Info<'a>,
-}
-
-impl Process<'_> {
-    pub fn spawn(&mut self) {
-        self.info.log(self.cmd);
-        match self.cmd.spawn() {
-            Ok(child) => {
-                let out = match child.wait_with_output() {
-                    Ok(out) => out,
-                    Err(err) => {
-                        let name = self.cmd.get_program().to_string_lossy();
-                        panic!("failed to wait the output from {name} process: {err}");
-                    }
-                };
-
-                if out.status.success() {
-                    return;
+pub fn spawn_process(cmd: &mut Command, info: Info) {
+    info.log(cmd);
+    match cmd.spawn() {
+        Ok(child) => {
+            let out = match child.wait_with_output() {
+                Ok(out) => out,
+                Err(err) => {
+                    let name = cmd.get_program().to_string_lossy();
+                    panic!("failed to wait the output from {name} process: {err}");
                 }
+            };
 
-                let stderr = String::from_utf8_lossy(&out.stderr);
-                panic!("run failed:\n{stderr}\n");
+            if out.status.success() {
+                return;
             }
-            Err(err) => {
-                let name = self.cmd.get_program().to_string_lossy();
-                panic!("failed to spawn {name} process: {err}");
-            }
+
+            let stderr = String::from_utf8_lossy(&out.stderr);
+            panic!("run failed:\n{stderr}\n");
+        }
+        Err(err) => {
+            let name = cmd.get_program().to_string_lossy();
+            panic!("failed to spawn {name} process: {err}");
         }
     }
 }
