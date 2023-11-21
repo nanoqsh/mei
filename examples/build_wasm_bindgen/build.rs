@@ -1,9 +1,9 @@
-use {
-    mei::{OptLevel, Spawn, Target},
-    sailfish::TemplateOnce,
-};
-
 fn main() {
+    use {
+        askama::Template,
+        mei::{OptLevel, Target},
+    };
+
     // TODO
     println!("cargo:rerun-if-changed=.");
 
@@ -18,28 +18,35 @@ fn main() {
 
     make_greet.spawn();
     let greet = mei::artifact("greet.wasm");
-    let js_dir = mei::subdir("js");
+    let js_out = mei::target_dir().join("js");
 
-    // > wasm-bindgen --target no-modules --out-dir {js_dir} --no-typescript {make_greet.path_of(&greet)}
     mei::tool("wasm-bindgen")
         .args(["--target", "no-modules"])
         .arg("--out-dir")
-        .arg(&js_dir)
+        .arg(&js_out)
         .arg("--no-typescript")
         .arg(make_greet.path_of(&greet))
         .spawn();
 
-    let js_path = js_dir.join("greet.js");
-    let js = mei::read_to_string(js_path);
+    let index = {
+        #[derive(Template)]
+        #[template(path = "index.html")]
+        struct Index {
+            js: String,
+        }
 
-    mei::write("static/index.html", {
-        let index = Index { js };
-        index.render_once().expect("render index.html")
-    });
+        let js_path = js_out.join("greet.js");
+        let js = mei::read_to_string(js_path);
+        Index { js }
+    };
 
-    let greet_bg_path = js_dir.join("greet_bg.wasm");
+    mei::write(
+        "static/index.html",
+        index.render().expect("render index.html"),
+    );
+
+    let greet_bg_path = js_out.join("greet_bg.wasm");
     if cfg!(feature = "wasm-opt") && OptLevel::is_optimized() {
-        // > wasm-opt -Os {greet_bg_path} -o static/greet_bg.wasm
         mei::tool("wasm-opt")
             .arg("-Os")
             .arg(&greet_bg_path)
@@ -48,10 +55,4 @@ fn main() {
     } else {
         mei::copy(&greet_bg_path, "static/greet_bg.wasm");
     }
-}
-
-#[derive(TemplateOnce)]
-#[template(path = "index.stpl")]
-struct Index {
-    js: String,
 }

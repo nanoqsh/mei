@@ -10,8 +10,8 @@ file_server = { path = "../file_server" }
 greet = { path = "greet" }
 
 [build-dependencies]
+askama = { version = "0.12", default-features = false }
 mei = { path = "../../mei" }
-sailfish = { version = "0.8", default-features = false, features = ["derive"] }
 
 [features]
 wasm-opt = []

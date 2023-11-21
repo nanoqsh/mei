@@ -12,8 +12,8 @@ impl OptLevel {
     }
 }
 
-pub fn subdir(name: &str) -> PathBuf {
-    Mei::get().vars().target_dir.join(name)
+pub fn target_dir() -> &'static Path {
+    &Mei::get().vars().target_dir
 }
 
 pub(crate) struct Vars {
@@ -46,7 +46,7 @@ impl Vars {
 
     pub fn make_mei_dir(&self) -> &Path {
         self.mei_dir.get_or_init(|| {
-            let mei = subdir("mei");
+            let mei = target_dir().join("mei");
             crate::fs::create_dir(&mei);
             mei
         })

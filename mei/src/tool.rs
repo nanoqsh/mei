@@ -53,6 +53,10 @@ impl Tool {
     pub fn into_command(self) -> Command {
         self.0
     }
+
+    pub fn spawn(&mut self) {
+        Spawn::spawn(self)
+    }
 }
 
 impl Spawn for Tool {

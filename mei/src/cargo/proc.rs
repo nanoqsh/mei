@@ -5,7 +5,7 @@ use {
         mei::Mei,
         spawn::{self, Info, Spawn},
     },
-    std::{borrow::Cow, path::PathBuf},
+    std::{borrow::Cow, fmt, path::PathBuf},
 };
 
 pub fn cargo() -> Cargo {
@@ -36,9 +36,14 @@ impl Cargo {
 
     pub fn manifest<S>(&mut self, manifest: S) -> &mut Self
     where
-        S: Into<Manifest>,
+        S: TryInto<Manifest>,
+        S::Error: fmt::Display,
     {
-        self.manifest = Some(manifest.into());
+        self.manifest = match manifest.try_into() {
+            Ok(manifest) => Some(manifest),
+            Err(err) => panic!("failed to set a manifest: {err}"),
+        };
+
         self
     }
 
@@ -51,6 +56,10 @@ impl Cargo {
         path.push(self.profile.target_dir_name());
         path.push(artifact.name());
         path
+    }
+
+    pub fn spawn(&mut self) {
+        Spawn::spawn(self)
     }
 }
 
