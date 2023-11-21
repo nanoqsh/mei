@@ -55,7 +55,7 @@ impl Tool {
     }
 
     pub fn spawn(&mut self) {
-        Spawn::spawn(self)
+        Spawn::spawn(self);
     }
 }
 

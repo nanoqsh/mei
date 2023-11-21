@@ -3,6 +3,9 @@ name = "build_wasm_bindgen"
 version = "0.1.0"
 edition = "2021"
 
+[package.metadata.mei]
+verbose = true
+
 [dependencies]
 file_server = { path = "../file_server" }
 

@@ -34,6 +34,9 @@ impl Cargo {
         self
     }
 
+    /// # Panics
+    /// This function tries to convert the `manifest` parameter
+    /// to [`Manifest`] type and panics if it fails.
     pub fn manifest<S>(&mut self, manifest: S) -> &mut Self
     where
         S: TryInto<Manifest>,
@@ -59,7 +62,7 @@ impl Cargo {
     }
 
     pub fn spawn(&mut self) {
-        Spawn::spawn(self)
+        Spawn::spawn(self);
     }
 }
 

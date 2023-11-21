@@ -24,17 +24,17 @@ pub(crate) struct Vars {
 
 impl Vars {
     pub fn new() -> Self {
-        let out_dir = PathBuf::from(var("OUT_DIR"));
-        let Some(target_dir) = get_target_dir(&out_dir) else {
-            panic!("failed to find target directory");
-        };
-
         let opt_level = {
             let level = var("OPT_LEVEL");
             match OptLevel::from_str(&level) {
                 Some(level) => level,
                 None => panic!("unknown OPT_LEVEL value: {level}"),
             }
+        };
+
+        let out_dir = PathBuf::from(var("OUT_DIR"));
+        let Some(target_dir) = get_target_dir(&out_dir) else {
+            panic!("failed to find target directory");
         };
 
         Self {
