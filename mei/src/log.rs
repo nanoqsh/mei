@@ -20,6 +20,10 @@ impl Log {
         Ok(Self { out })
     }
 
+    pub fn info(&self, s: &dyn Display) -> io::Result<()> {
+        self.write("        Info", s)
+    }
+
     pub fn building(&self, s: &dyn Display) -> io::Result<()> {
         self.write("    Building", s)
     }
