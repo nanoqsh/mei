@@ -1,7 +1,9 @@
 use {
     crate::{
+        cargo,
         mei::Mei,
         spawn::{self, Info, Spawn},
+        vars,
     },
     std::{
         borrow::Cow,
@@ -74,7 +76,7 @@ impl Spawn for Tool {
             Ok(()) => return,
             Err(err) if err.kind() == ErrorKind::NotFound => {
                 let name = self.name();
-                Mei::get().install(&name);
+                install(&name);
             }
             Err(err) => {
                 let name = self.name();
@@ -87,4 +89,25 @@ impl Spawn for Tool {
             panic!("failed to spawn {name} process: {err}");
         }
     }
+}
+
+fn install(name: &str) {
+    let tools = Mei::get().tools();
+    let Some(tool) = tools.get(name) else {
+        panic!("tool {name} not found");
+    };
+
+    _ = Mei::get().log().info(&format_args!(
+        "tool: {:?} {:?}",
+        tool.version, tool.from_crate,
+    ));
+
+    let bin_dir = vars::bin_dir();
+    let mut cargo = cargo::cargo_install(name, bin_dir);
+    if let Some(from) = &tool.from_crate {
+        cargo.bin(from);
+    }
+
+    // > cargo install wasm-bindgen-cli --bin wasm-bindgen --root {bin_dir} --target-dir {mei_dir}
+    todo!("install {name}");
 }

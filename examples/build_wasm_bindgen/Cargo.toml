@@ -6,6 +6,11 @@ edition = "2021"
 [package.metadata.mei]
 verbose = true
 
+[package.metadata.mei.tools]
+kek = { version = "0.2", crate = "wasm-bindgen-cli" }
+wasm-bindgen = { version = "0.2", crate = "wasm-bindgen-cli" }
+wasm-opt = "0.116"
+
 [dependencies]
 file_server = { path = "../file_server" }
 

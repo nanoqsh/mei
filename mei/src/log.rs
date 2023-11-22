@@ -24,6 +24,10 @@ impl Log {
         self.write("        Info", s)
     }
 
+    pub fn installing(&self, s: &dyn Display) -> io::Result<()> {
+        self.write("  Installing", s)
+    }
+
     pub fn building(&self, s: &dyn Display) -> io::Result<()> {
         self.write("    Building", s)
     }

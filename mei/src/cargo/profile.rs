@@ -15,12 +15,6 @@ impl Profile {
     }
 }
 
-impl Default for Profile {
-    fn default() -> Self {
-        Self::DEV
-    }
-}
-
 impl From<&'static str> for Profile {
     fn from(s: &'static str) -> Self {
         Self(s)

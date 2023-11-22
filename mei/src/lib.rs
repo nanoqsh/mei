@@ -4,7 +4,6 @@ mod fs;
 mod log;
 mod mei;
 mod spawn;
-mod tool;
 mod vars;
 
 mod cargo {
@@ -14,20 +13,30 @@ mod cargo {
     mod profile;
     mod target;
 
+    pub(crate) use self::proc::cargo_install;
+
     pub use self::{
         manifest::Manifest,
         opt_level::OptLevel,
-        proc::{cargo, Cargo},
+        proc::{cargo_build, Cargo},
         profile::Profile,
         target::Target,
     };
 }
 
+mod tool {
+    mod proc;
+    mod tools;
+
+    pub use self::proc::{tool, Tool};
+    pub(crate) use self::tools::Tools;
+}
+
 pub use crate::{
     artifact::{artifact, Artifact},
-    cargo::{cargo, Cargo, Manifest, OptLevel, Profile, Target},
+    cargo::{cargo_build, Cargo, Manifest, OptLevel, Profile, Target},
     fs::{copy, create_dir, read_to_string, write},
     spawn::Spawn,
     tool::{tool, Tool},
-    vars::target_dir,
+    vars::{bin_dir, target_dir},
 };

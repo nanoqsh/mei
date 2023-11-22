@@ -7,7 +7,7 @@ fn main() {
     // TODO
     println!("cargo:rerun-if-changed=.");
 
-    let mut make_greet = mei::cargo();
+    let mut make_greet = mei::cargo_build();
     make_greet
         .manifest("greet")
         .target(Target::WASM32_UNKNOWN_UNKNOWN);
@@ -27,6 +27,8 @@ fn main() {
         .arg("--no-typescript")
         .arg(make_greet.path_of(&greet))
         .spawn();
+
+    mei::tool("kek").spawn();
 
     let index = {
         #[derive(Template)]

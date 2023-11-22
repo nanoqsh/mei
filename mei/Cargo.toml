@@ -5,6 +5,9 @@ edition = "2021"
 description = "Cargo build subsystem"
 license = "Apache-2.0"
 
+[dependencies]
+semver = "1"
+
 [dependencies.toml]
 version = "0.21"
 package = "toml_edit"

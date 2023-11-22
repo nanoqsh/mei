@@ -7,6 +7,7 @@ use {
 pub enum Info<'a> {
     Running,
     Building { name: &'a str },
+    Installing { name: &'a str },
 }
 
 impl Info<'_> {
@@ -20,6 +21,11 @@ impl Info<'_> {
                 verbose: mei.verbose(),
             }),
             Self::Building { name } => log.building(&DisplayCommand {
+                cmd,
+                name,
+                verbose: mei.verbose(),
+            }),
+            Self::Installing { name } => log.installing(&DisplayCommand {
                 cmd,
                 name,
                 verbose: mei.verbose(),

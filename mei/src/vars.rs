@@ -16,8 +16,17 @@ pub fn target_dir() -> &'static Path {
     &Mei::get().vars().target_dir
 }
 
+pub fn bin_dir() -> &'static Path {
+    &Mei::get().vars().bin_dir
+}
+
+pub fn mei_dir() -> &'static Path {
+    Mei::get().vars().make_mei_dir()
+}
+
 pub(crate) struct Vars {
     opt_level: OptLevel,
+    bin_dir: PathBuf,
     target_dir: PathBuf,
     mei_dir: OnceLock<PathBuf>,
 }
@@ -37,14 +46,20 @@ impl Vars {
             panic!("failed to find target directory");
         };
 
+        let bin_dir = match target_dir.parent() {
+            Some(bin_dir) => bin_dir.to_owned(),
+            None => panic!("failed to find bin directory"),
+        };
+
         Self {
             opt_level,
             target_dir,
+            bin_dir,
             mei_dir: OnceLock::new(),
         }
     }
 
-    pub fn make_mei_dir(&self) -> &Path {
+    fn make_mei_dir(&self) -> &Path {
         self.mei_dir.get_or_init(|| {
             let mei = target_dir().join("mei");
             crate::fs::create_dir(&mei);

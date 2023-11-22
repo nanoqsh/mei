@@ -1,11 +1,17 @@
 use {
-    crate::{config::Config, log::Log, vars::Vars},
+    crate::{
+        config::{Config, Verbose},
+        log::Log,
+        tool::Tools,
+        vars::Vars,
+    },
     std::sync::OnceLock,
 };
 
 pub(crate) struct Mei {
-    verbose: bool,
+    verbose: Verbose,
     log: Log,
+    tools: Tools,
     vars: Vars,
 }
 
@@ -19,6 +25,7 @@ impl Mei {
                 Ok(log) => log,
                 Err(err) => panic!("failed to create the log: {err}"),
             },
+            tools: conf.tools,
             vars: Vars::new(),
         }
     }
@@ -30,18 +37,18 @@ impl Mei {
     }
 
     pub fn verbose(&self) -> bool {
-        self.verbose
+        self.verbose.enabled()
     }
 
     pub fn log(&self) -> &Log {
         &self.log
     }
 
-    pub fn vars(&self) -> &Vars {
-        &self.vars
+    pub fn tools(&self) -> &Tools {
+        &self.tools
     }
 
-    pub fn install(&self, tool: &str) {
-        todo!("install {tool}")
+    pub fn vars(&self) -> &Vars {
+        &self.vars
     }
 }

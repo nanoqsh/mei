@@ -1,68 +1,24 @@
-use std::{
-    borrow::Cow,
-    error, fmt,
-    path::{Path, PathBuf},
-};
+use std::path::PathBuf;
 
-const TOML: &str = "Cargo.toml";
-
-pub struct Manifest(PathBuf);
+pub struct Manifest(Box<str>);
 
 impl Manifest {
-    fn new(mut path: PathBuf) -> Result<Self, IncorrectManifest> {
-        if path.ends_with(TOML) {
-            Ok(Self(path))
-        } else if path.is_dir() {
-            path.push(TOML);
-            Ok(Self(path))
-        } else {
-            Err(IncorrectManifest)
-        }
+    pub fn path(&self) -> PathBuf {
+        let mut path = PathBuf::from(self.as_str());
+        path.push("Cargo.toml");
+        path
     }
 
-    pub fn path(&self) -> &Path {
-        &self.0
-    }
-
-    pub fn to_str(&self) -> Cow<str> {
-        self.0
-            .parent()
-            .map(Path::to_string_lossy)
-            .unwrap_or_default()
+    pub fn as_str(&self) -> &str {
+        &self.0[..]
     }
 }
 
-#[derive(Debug)]
-pub struct IncorrectManifest;
-
-impl fmt::Display for IncorrectManifest {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "the manifest must be a path to a {TOML} file")
-    }
-}
-
-impl error::Error for IncorrectManifest {}
-
-impl TryFrom<PathBuf> for Manifest {
-    type Error = IncorrectManifest;
-
-    fn try_from(path: PathBuf) -> Result<Self, Self::Error> {
-        Self::new(path)
-    }
-}
-
-impl TryFrom<&str> for Manifest {
-    type Error = IncorrectManifest;
-
-    fn try_from(path: &str) -> Result<Self, Self::Error> {
-        Self::new(path.into())
-    }
-}
-
-impl TryFrom<String> for Manifest {
-    type Error = IncorrectManifest;
-
-    fn try_from(path: String) -> Result<Self, Self::Error> {
-        Self::new(path.into())
+impl<S> From<S> for Manifest
+where
+    S: Into<Box<str>>,
+{
+    fn from(s: S) -> Self {
+        Self(s.into())
     }
 }

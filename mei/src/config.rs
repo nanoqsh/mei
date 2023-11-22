@@ -1,10 +1,12 @@
 use {
+    crate::tool::Tools,
     std::{env, fs},
-    toml::Document,
+    toml::{Document, Value},
 };
 
 pub(crate) struct Config {
-    pub verbose: bool,
+    pub verbose: Verbose,
+    pub tools: Tools,
 }
 
 impl Config {
@@ -27,19 +29,47 @@ impl Config {
             .or_else(|| doc.get("workspace"))
             .and_then(|p| p.get("metadata")?.get("mei"));
 
-        let verbose = var_as_bool("MAI_VERBOSE")
-            .or_else(|| mei?.get("verbose")?.as_bool())
+        let verbose = Verbose::from_var()
+            .or_else(|| Verbose::from_toml(mei?.get("verbose")?.as_value()?))
             .unwrap_or_default();
 
-        Self { verbose }
+        let tools = mei
+            .and_then(|m| Some(Tools::from_toml(m.get("tools")?.as_table_like()?)))
+            .unwrap_or_default();
+
+        Self { verbose, tools }
     }
 }
 
-fn var_as_bool(key: &str) -> Option<bool> {
-    let val = env::var(key).ok()?;
-    match &val[..] {
-        "0" => Some(false),
-        "1" => Some(true),
-        _ => None,
+#[derive(Clone, Copy, Default)]
+pub(crate) enum Verbose {
+    #[default]
+    No,
+    Yes,
+    Full,
+}
+
+impl Verbose {
+    fn from_var() -> Option<Self> {
+        let val = env::var("MAI_VERBOSE").ok()?;
+        match &val[..] {
+            "0" => Some(Self::No),
+            "1" => Some(Self::Yes),
+            "full" => Some(Self::Full),
+            _ => None,
+        }
+    }
+
+    fn from_toml(val: &Value) -> Option<Self> {
+        match val {
+            Value::String(s) if s.value() == "full" => Some(Self::Full),
+            Value::Boolean(f) if *f.value() => Some(Self::Yes),
+            Value::Boolean(_) => Some(Self::No),
+            _ => None,
+        }
+    }
+
+    pub fn enabled(self) -> bool {
+        matches!(self, Self::Yes | Self::Full)
     }
 }
