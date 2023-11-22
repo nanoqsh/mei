@@ -102,11 +102,12 @@ impl Spawn for Cargo {
             .stdout(Stdio::piped())
             .stderr(stderr);
 
-        spawn::spawn_process(
-            &mut cargo,
-            Info::Building {
-                name: name.as_ref(),
-            },
-        );
+        let info = Info::Building {
+            name: name.as_ref(),
+        };
+
+        if let Err(err) = spawn::spawn_process(&mut cargo, info) {
+            panic!("failed to spawn cargo process: {err}");
+        }
     }
 }

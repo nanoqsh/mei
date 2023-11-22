@@ -1,7 +1,12 @@
 use {
-    crate::spawn::{self, Info, Spawn},
+    crate::{
+        mei::Mei,
+        spawn::{self, Info, Spawn},
+    },
     std::{
+        borrow::Cow,
         ffi::OsStr,
+        io::ErrorKind,
         process::{Command, Stdio},
     },
 };
@@ -17,6 +22,10 @@ where
 pub struct Tool(Command);
 
 impl Tool {
+    pub fn name(&self) -> Cow<str> {
+        self.0.get_program().to_string_lossy()
+    }
+
     pub fn arg<S>(&mut self, arg: S) -> &mut Self
     where
         S: AsRef<OsStr>,
@@ -61,6 +70,21 @@ impl Tool {
 
 impl Spawn for Tool {
     fn spawn(&mut self) {
-        spawn::spawn_process(&mut self.0, Info::Running);
+        match spawn::spawn_process(&mut self.0, Info::Running) {
+            Ok(()) => return,
+            Err(err) if err.kind() == ErrorKind::NotFound => {
+                let name = self.name();
+                Mei::get().install(&name);
+            }
+            Err(err) => {
+                let name = self.name();
+                panic!("failed to spawn {name} process: {err}");
+            }
+        }
+
+        if let Err(err) = spawn::spawn_process(&mut self.0, Info::Running) {
+            let name = self.name();
+            panic!("failed to spawn {name} process: {err}");
+        }
     }
 }

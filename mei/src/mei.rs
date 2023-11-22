@@ -23,7 +23,7 @@ impl Mei {
         }
     }
 
-    pub(crate) fn get() -> &'static Self {
+    pub fn get() -> &'static Self {
         static MEI: OnceLock<Mei> = OnceLock::new();
 
         MEI.get_or_init(Self::new)
@@ -39,5 +39,9 @@ impl Mei {
 
     pub fn vars(&self) -> &Vars {
         &self.vars
+    }
+
+    pub fn install(&self, tool: &str) {
+        todo!("install {tool}")
     }
 }

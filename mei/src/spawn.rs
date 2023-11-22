@@ -1,6 +1,6 @@
 use {
     crate::mei::Mei,
-    std::{ffi::OsStr, fmt, process::Command},
+    std::{ffi::OsStr, fmt, io, process::Command},
 };
 
 #[derive(Clone, Copy)]
@@ -34,34 +34,31 @@ pub trait Spawn {
 
 impl Spawn for Command {
     fn spawn(&mut self) {
-        spawn_process(self, Info::Running);
-    }
-}
-
-pub fn spawn_process(cmd: &mut Command, info: Info) {
-    info.log(cmd);
-    match cmd.spawn() {
-        Ok(child) => {
-            let out = match child.wait_with_output() {
-                Ok(out) => out,
-                Err(err) => {
-                    let name = cmd.get_program().to_string_lossy();
-                    panic!("failed to wait the output from {name} process: {err}");
-                }
-            };
-
-            if out.status.success() {
-                return;
-            }
-
-            let stderr = String::from_utf8_lossy(&out.stderr);
-            panic!("run failed:\n{stderr}\n");
-        }
-        Err(err) => {
-            let name = cmd.get_program().to_string_lossy();
+        if let Err(err) = spawn_process(self, Info::Running) {
+            let name = self.get_program().to_string_lossy();
             panic!("failed to spawn {name} process: {err}");
         }
     }
+}
+
+pub fn spawn_process(cmd: &mut Command, info: Info) -> io::Result<()> {
+    let child = cmd.spawn()?;
+
+    info.log(cmd);
+    let out = match child.wait_with_output() {
+        Ok(out) => out,
+        Err(err) => {
+            let name = cmd.get_program().to_string_lossy();
+            panic!("failed to wait the output from {name} process: {err}");
+        }
+    };
+
+    if out.status.success() {
+        return Ok(());
+    }
+
+    let stderr = String::from_utf8_lossy(&out.stderr);
+    panic!("run failed:\n{stderr}\n");
 }
 
 struct DisplayCommand<'a> {
