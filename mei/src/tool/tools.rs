@@ -1,11 +1,12 @@
 use {
-    semver::Version,
+    semver::VersionReq,
     std::collections::HashMap,
     toml::{Item, TableLike},
 };
 
+#[derive(Debug)]
 pub(crate) struct Tool {
-    pub version: Version,
+    pub version: VersionReq,
     pub from_crate: Option<Box<str>>,
 }
 
@@ -14,7 +15,7 @@ impl Tool {
         item.as_table_like()
             .and_then(|t| {
                 Some(Self {
-                    version: t.get("version").and_then(|v| v.as_str())?.parse().ok()?,
+                    version: t.get("version")?.as_str()?.parse().ok()?,
                     from_crate: t.get("crate").and_then(Item::as_str).map(Box::from),
                 })
             })

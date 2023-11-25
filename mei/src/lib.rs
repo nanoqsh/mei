@@ -38,5 +38,5 @@ pub use crate::{
     fs::{copy, create_dir, read_to_string, write},
     spawn::Spawn,
     tool::{tool, Tool},
-    vars::{bin_dir, target_dir},
+    vars::{bin_dir, root_dir, target_dir},
 };

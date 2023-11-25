@@ -71,13 +71,7 @@ where
     M: Mode,
 {
     let mut cargo = Command::new("cargo");
-    let info = proc.mode.mode(&mut cargo);
-
-    match proc.profile {
-        Profile::RELEASE => _ = cargo.arg("--release"),
-        Profile(profile) => _ = cargo.args(["--profile", profile]),
-    }
-
+    let info = proc.mode.mode(&mut cargo, proc.profile);
     if let Some(Target(target)) = proc.target {
         cargo.args(["--target", target]);
     }
@@ -98,14 +92,17 @@ where
     }
 }
 
-impl Spawn for Cargo<Build> {
+impl<M> Spawn for Cargo<M>
+where
+    M: Mode,
+{
     fn spawn(&mut self) {
         spawn(self);
     }
 }
 
 trait Mode {
-    fn mode(&self, cmd: &mut Command) -> Info;
+    fn mode(&self, cmd: &mut Command, profile: Profile) -> Info;
 }
 
 pub struct Build {
@@ -121,14 +118,25 @@ impl Cargo<Build> {
         self
     }
 
+    /// Spawns the cargo process.
+    ///
+    /// This is a shortcut method of the [`Spawn`] trait
+    /// without having to import this in the scope.
     pub fn spawn(&mut self) {
         spawn(self);
     }
 }
 
 impl Mode for Build {
-    fn mode(&self, cmd: &mut Command) -> Info {
+    fn mode(&self, cmd: &mut Command, profile: Profile) -> Info {
         cmd.arg("build");
+
+        match profile {
+            Profile::DEV => {} // default build profile
+            Profile::RELEASE => _ = cmd.arg("--release"),
+            Profile(profile) => _ = cmd.args(["--profile", profile]),
+        }
+
         Info::Building {
             name: match &self.manifest {
                 Some(m) => {
@@ -155,10 +163,16 @@ impl<'a> Cargo<Install<'a>> {
 }
 
 impl Mode for Install<'_> {
-    fn mode(&self, cmd: &mut Command) -> Info {
+    fn mode(&self, cmd: &mut Command, profile: Profile) -> Info {
         cmd.args(["install", self.name])
             .arg("--root")
             .arg(self.root);
+
+        match profile {
+            Profile::RELEASE => {} // default install profile
+            Profile::DEV => _ = cmd.arg("--debug"),
+            Profile(profile) => _ = cmd.args(["--profile", profile]),
+        }
 
         if let Some(bin) = self.bin {
             cmd.args(["--bin", bin]);

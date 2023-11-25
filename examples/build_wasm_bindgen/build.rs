@@ -28,8 +28,6 @@ fn main() {
         .arg(make_greet.path_of(&greet))
         .spawn();
 
-    mei::tool("kek").spawn();
-
     let index = {
         #[derive(Template)]
         #[template(path = "index.html")]

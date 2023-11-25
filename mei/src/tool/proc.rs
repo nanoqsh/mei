@@ -7,6 +7,7 @@ use {
     },
     std::{
         borrow::Cow,
+        env,
         ffi::OsStr,
         io::ErrorKind,
         process::{Command, Stdio},
@@ -72,9 +73,25 @@ impl Tool {
 
 impl Spawn for Tool {
     fn spawn(&mut self) {
+        // Add the `bin` directory to the PATH variable
+        let bin = vars::bin_dir();
+        match env::var_os("PATH") {
+            Some(path) => {
+                let mut paths: Vec<_> = env::split_paths(&path).collect();
+                if paths.iter().all(|p| p != bin) {
+                    paths.push(bin.to_owned());
+                    let new = env::join_paths(paths).expect("paths should be correct");
+                    env::set_var("PATH", new);
+                }
+            }
+            None => env::set_var("PATH", bin),
+        }
+
+        // Spawn a tool process
         match spawn::spawn_process(&mut self.0, Info::Running) {
             Ok(()) => return,
             Err(err) if err.kind() == ErrorKind::NotFound => {
+                // Install the tool if it's not found
                 let name = self.name();
                 install(&name);
             }
@@ -84,6 +101,7 @@ impl Spawn for Tool {
             }
         }
 
+        // Spawn the process after the tool installed
         if let Err(err) = spawn::spawn_process(&mut self.0, Info::Running) {
             let name = self.name();
             panic!("failed to spawn {name} process: {err}");
@@ -102,12 +120,15 @@ fn install(name: &str) {
         tool.version, tool.from_crate,
     ));
 
-    let bin_dir = vars::bin_dir();
-    let mut cargo = cargo::cargo_install(name, bin_dir);
-    if let Some(from) = &tool.from_crate {
-        cargo.bin(from);
+    let mut cargo = {
+        let name = tool.from_crate.as_deref().unwrap_or(name);
+        let root = vars::root_dir();
+        cargo::cargo_install(name, root)
+    };
+
+    if tool.from_crate.is_some() {
+        cargo.bin(name);
     }
 
-    // > cargo install wasm-bindgen-cli --bin wasm-bindgen --root {bin_dir} --target-dir {mei_dir}
-    todo!("install {name}");
+    cargo.spawn();
 }

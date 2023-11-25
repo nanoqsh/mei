@@ -7,7 +7,6 @@ edition = "2021"
 verbose = true
 
 [package.metadata.mei.tools]
-kek = { version = "0.2", crate = "wasm-bindgen-cli" }
 wasm-bindgen = { version = "0.2", crate = "wasm-bindgen-cli" }
 wasm-opt = "0.116"
 
