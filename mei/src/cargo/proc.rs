@@ -6,6 +6,7 @@ use {
         spawn::{self, Info, Spawn},
         vars,
     },
+    semver::VersionReq,
     std::{
         path::Path,
         path::PathBuf,
@@ -29,6 +30,7 @@ pub(crate) fn cargo_install<'a>(name: &'a str, root: &'a Path) -> Cargo<Install<
             name,
             root,
             bin: None,
+            version: None,
         },
     }
 }
@@ -153,11 +155,17 @@ pub(crate) struct Install<'a> {
     name: &'a str,
     root: &'a Path,
     bin: Option<&'a str>,
+    version: Option<&'a VersionReq>,
 }
 
 impl<'a> Cargo<Install<'a>> {
     pub fn bin(&mut self, bin: &'a str) -> &mut Self {
         self.mode.bin = Some(bin);
+        self
+    }
+
+    pub fn version(&mut self, version: &'a VersionReq) -> &mut Self {
+        self.mode.version = Some(version);
         self
     }
 }
@@ -176,6 +184,11 @@ impl Mode for Install<'_> {
 
         if let Some(bin) = self.bin {
             cmd.args(["--bin", bin]);
+        }
+
+        if let Some(version) = self.version {
+            let version = version.to_string();
+            cmd.arg("--version").arg(version);
         }
 
         Info::Installing { name: self.name }

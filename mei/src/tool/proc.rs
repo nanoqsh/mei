@@ -115,11 +115,6 @@ fn install(name: &str) {
         panic!("tool {name} not found");
     };
 
-    _ = Mei::get().log().info(&format_args!(
-        "tool: {:?} {:?}",
-        tool.version, tool.from_crate,
-    ));
-
     let mut cargo = {
         let name = tool.from_crate.as_deref().unwrap_or(name);
         let root = vars::root_dir();
@@ -130,5 +125,5 @@ fn install(name: &str) {
         cargo.bin(name);
     }
 
-    cargo.spawn();
+    cargo.version(&tool.version).spawn();
 }

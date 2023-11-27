@@ -73,7 +73,7 @@ where
         if mei.verbose() {
             _ = mei
                 .log()
-                .info(&format_args!("write to {path}", path = path.display()));
+                .info(&format_args!("write to file {path}", path = path.display()));
         }
 
         if let Some(parent) = path.parent() {
@@ -100,7 +100,7 @@ where
         if mei.verbose() {
             _ = mei
                 .log()
-                .info(&format_args!("read from {path}", path = path.display()));
+                .info(&format_args!("read file {path}", path = path.display()));
         }
 
         match fs::read_to_string(&path) {
