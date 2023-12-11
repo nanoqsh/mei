@@ -1,6 +1,5 @@
-pub fn run(routes: &'static [Route]) {
+pub fn run(routes: &[Route]) {
     use {
-        http_body_util::Full,
         hyper::{
             header, http::HeaderValue, server::conn::http1, service, Method, Request, Response,
             StatusCode,
@@ -20,17 +19,21 @@ pub fn run(routes: &'static [Route]) {
         Arc::new(routes)
     };
 
-    let page = move |req: Request<_>| match (req.method(), routes.get(req.uri().path())) {
-        (&Method::GET, Some(page)) => {
-            let mut res = Response::new(Full::new(page.body));
-            res.headers_mut().insert(
-                header::CONTENT_TYPE,
-                HeaderValue::from_static(page.content_type),
-            );
+    let page = move |req: Request<_>| {
+        use http_body_util::Full;
 
-            Some(res)
+        match (req.method(), routes.get(req.uri().path())) {
+            (&Method::GET, Some(page)) => {
+                let mut res = Response::new(Full::new(page.body));
+                res.headers_mut().insert(
+                    header::CONTENT_TYPE,
+                    HeaderValue::from_static(page.content_type),
+                );
+
+                Some(res)
+            }
+            _ => None,
         }
-        _ => None,
     };
 
     let no_found = || {
