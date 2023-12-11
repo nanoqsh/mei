@@ -4,7 +4,7 @@ use {
         cargo::{Manifest, Profile, Target},
         mei::Mei,
         spawn::{self, Info, Spawn},
-        vars,
+        var,
     },
     semver::VersionReq,
     std::{
@@ -57,7 +57,7 @@ impl<M> Cargo<M> {
     }
 
     pub fn path_of(&self, artifact: &Artifact) -> PathBuf {
-        let mut path = vars::mei_dir().to_owned();
+        let mut path = var::mei_dir().to_owned();
         if let Some(Target(target)) = self.target {
             path.push(target);
         }
@@ -85,7 +85,7 @@ where
 
     cargo
         .arg("--target-dir")
-        .arg(vars::mei_dir())
+        .arg(var::mei_dir())
         .stdout(Stdio::piped())
         .stderr(stderr);
 

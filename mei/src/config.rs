@@ -1,6 +1,6 @@
 use {
     crate::tool::Tools,
-    std::{env, fs},
+    std::fs,
     toml::{Document, Value},
 };
 
@@ -51,7 +51,9 @@ pub(crate) enum Verbose {
 
 impl Verbose {
     fn from_var() -> Option<Self> {
-        let val = env::var("MAI_VERBOSE").ok()?;
+        use crate::env;
+
+        let val = env::try_var(env::VERBOSE)?;
         match &val[..] {
             "0" => Some(Self::No),
             "1" => Some(Self::Yes),

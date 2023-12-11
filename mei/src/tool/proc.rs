@@ -3,7 +3,7 @@ use {
         cargo,
         mei::Mei,
         spawn::{self, Info, Spawn},
-        vars,
+        var,
     },
     std::{
         borrow::Cow,
@@ -74,7 +74,7 @@ impl Tool {
 impl Spawn for Tool {
     fn spawn(&mut self) {
         // Add the `bin` directory to the PATH variable
-        let bin = vars::bin_dir();
+        let bin = var::bin_dir();
         match env::var_os("PATH") {
             Some(path) => {
                 let mut paths: Vec<_> = env::split_paths(&path).collect();
@@ -117,7 +117,7 @@ fn install(name: &str) {
 
     let mut cargo = {
         let name = tool.from_crate.as_deref().unwrap_or(name);
-        let root = vars::root_dir();
+        let root = var::root_dir();
         cargo::cargo_install(name, root)
     };
 

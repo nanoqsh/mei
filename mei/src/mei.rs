@@ -1,8 +1,9 @@
 use crate::{
     config::{Config, Verbose},
+    env,
     log::Log,
     tool::Tools,
-    vars::Vars,
+    var::Vars,
 };
 
 pub(crate) struct Mei {
@@ -14,6 +15,7 @@ pub(crate) struct Mei {
 
 impl Mei {
     fn new() -> Self {
+        env::rerun_if_env_changed();
         let conf = Config::load();
 
         Self {

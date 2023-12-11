@@ -1,10 +1,11 @@
 mod artifact;
 mod config;
+mod env;
 mod fs;
 mod log;
 mod mei;
 mod spawn;
-mod vars;
+mod var;
 
 mod cargo {
     mod manifest;
@@ -38,5 +39,5 @@ pub use crate::{
     fs::{copy, create_dir, read_to_string, write},
     spawn::Spawn,
     tool::{tool, Tool},
-    vars::{bin_dir, root_dir, target_dir},
+    var::{bin_dir, root_dir, target_dir},
 };
