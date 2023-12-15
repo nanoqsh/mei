@@ -1,6 +1,8 @@
-pub(crate) const VERBOSE: &str = "MAI_VERBOSE";
+pub(crate) const LOG: &str = "MEI_LOG";
+pub(crate) const VERBOSE: &str = "MEI_VERBOSE";
 
 pub(crate) fn rerun_if_env_changed() {
+    println!("cargo:rerun-if-env-changed={LOG}");
     println!("cargo:rerun-if-env-changed={VERBOSE}");
 }
 

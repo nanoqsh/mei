@@ -1,9 +1,12 @@
-use std::{
-    fmt::Display,
-    fs::File,
-    io::{self, Write},
-    os::unix::process,
-    process::Stdio,
+use {
+    crate::config::Log as Config,
+    std::{
+        fmt::Display,
+        fs::File,
+        io::{self, IsTerminal, Write},
+        os::unix::process,
+        process::Stdio,
+    },
 };
 
 pub(crate) struct Log {
@@ -11,13 +14,22 @@ pub(crate) struct Log {
 }
 
 impl Log {
-    pub fn new() -> io::Result<Self> {
-        let parent_id = process::parent_id();
-        let out = File::options()
-            .append(true)
-            .open(format!("/proc/{parent_id}/fd/2"))?;
+    pub fn new(conf: Config) -> Self {
+        let res = match conf {
+            #[cfg(unix)]
+            Config::Console => {
+                let parent_id = process::parent_id();
+                File::options()
+                    .append(true)
+                    .open(format!("/proc/{parent_id}/fd/2"))
+            }
+            Config::Path(path) => File::create(path),
+        };
 
-        Ok(Self { out })
+        match res {
+            Ok(out) => Self { out },
+            Err(err) => panic!("failed to create the log: {err}"),
+        }
     }
 
     pub fn info(&self, s: &dyn Display) -> io::Result<()> {
@@ -38,7 +50,12 @@ impl Log {
 
     fn write(&self, label: &str, s: &dyn Display) -> io::Result<()> {
         let mut out = &self.out;
-        writeln!(out, "\x1b[2K\r\x1b[1;34m{label}\x1b[0m {s}")?;
+        if cfg!(unix) && out.is_terminal() {
+            writeln!(out, "\x1b[2K\r\x1b[1;34m{label}\x1b[0m {s}")?;
+        } else {
+            writeln!(out, "{label} {s}")?;
+        }
+
         out.flush()
     }
 

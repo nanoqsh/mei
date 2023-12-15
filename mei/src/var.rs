@@ -57,7 +57,6 @@ impl Vars {
         };
 
         let bin_dir = root_dir.join("bin");
-
         Self {
             opt_level,
             target_dir,

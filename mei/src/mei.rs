@@ -19,10 +19,7 @@ impl Mei {
         let conf = Config::load();
 
         Self {
-            log: match Log::new() {
-                Ok(log) => log,
-                Err(err) => panic!("failed to create the log: {err}"),
-            },
+            log: Log::new(conf.log),
             vars: Vars::new(),
             tools: conf.tools,
             verbose: conf.verbose,
