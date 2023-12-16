@@ -13,12 +13,13 @@ where
 {
     fn create_dir_impl(dir: &Path) {
         let dir = canonicalize(dir);
-        let mei = Mei::get();
-        if mei.verbose() {
-            _ = mei.log().info(&format_args!(
-                "create directory at {dir}",
-                dir = dir.display(),
-            ));
+        if let Some(mei) = Mei::try_get() {
+            if mei.verbose() {
+                _ = mei.log().info(&format_args!(
+                    "create directory at {dir}",
+                    dir = dir.display(),
+                ));
+            }
         }
 
         if let Err(err) = fs::create_dir(&dir) {
@@ -41,13 +42,14 @@ where
     fn copy_impl(from: &Path, to: &Path) {
         let from = canonicalize(from);
         let to = canonicalize(to);
-        let mei = Mei::get();
-        if mei.verbose() {
-            _ = mei.log().info(&format_args!(
-                "copy from {from} to {to}",
-                from = from.display(),
-                to = to.display(),
-            ));
+        if let Some(mei) = Mei::try_get() {
+            if mei.verbose() {
+                _ = mei.log().info(&format_args!(
+                    "copy from {from} to {to}",
+                    from = from.display(),
+                    to = to.display(),
+                ));
+            }
         }
 
         if let Err(err) = fs::copy(&from, &to) {
@@ -69,11 +71,12 @@ where
 {
     fn write_impl(path: &Path, contents: &[u8]) {
         let path = canonicalize(path);
-        let mei = Mei::get();
-        if mei.verbose() {
-            _ = mei
-                .log()
-                .info(&format_args!("write to file {path}", path = path.display()));
+        if let Some(mei) = Mei::try_get() {
+            if mei.verbose() {
+                _ = mei
+                    .log()
+                    .info(&format_args!("write to file {path}", path = path.display()));
+            }
         }
 
         if let Some(parent) = path.parent() {
@@ -96,11 +99,12 @@ where
 {
     fn read_to_string_impl(path: &Path) -> String {
         let path = canonicalize(path);
-        let mei = Mei::get();
-        if mei.verbose() {
-            _ = mei
-                .log()
-                .info(&format_args!("read file {path}", path = path.display()));
+        if let Some(mei) = Mei::try_get() {
+            if mei.verbose() {
+                _ = mei
+                    .log()
+                    .info(&format_args!("read file {path}", path = path.display()));
+            }
         }
 
         match fs::read_to_string(&path) {

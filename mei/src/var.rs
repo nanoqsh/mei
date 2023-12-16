@@ -66,9 +66,9 @@ impl Vars {
         }
     }
 
-    fn make_mei_dir(&self) -> &Path {
+    pub fn make_mei_dir(&self) -> &Path {
         self.mei_dir.get_or_init(|| {
-            let mei = target_dir().join("mei");
+            let mei = self.target_dir.join("mei");
             crate::fs::create_dir(&mei);
             mei
         })

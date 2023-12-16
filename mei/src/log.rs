@@ -1,10 +1,9 @@
 use {
-    crate::config::Log as Config,
+    crate::{config::Log as Config, var::Vars},
     std::{
         fmt::Display,
         fs::File,
         io::{self, IsTerminal, Write},
-        os::unix::process,
         process::Stdio,
     },
 };
@@ -14,16 +13,19 @@ pub(crate) struct Log {
 }
 
 impl Log {
-    pub fn new(conf: Config) -> Self {
+    pub fn new(conf: Config, vars: &Vars) -> Self {
         let res = match conf {
             #[cfg(unix)]
             Config::Console => {
+                use std::os::unix::process;
+
                 let parent_id = process::parent_id();
                 File::options()
                     .append(true)
                     .open(format!("/proc/{parent_id}/fd/2"))
             }
-            Config::Path(path) => File::create(path),
+            Config::Path(path) if path.is_absolute() => File::create(path),
+            Config::Path(path) => File::create(vars.make_mei_dir().join(path)),
         };
 
         match res {

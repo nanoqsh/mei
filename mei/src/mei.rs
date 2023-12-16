@@ -1,10 +1,15 @@
-use crate::{
-    config::{Config, Verbose},
-    env,
-    log::Log,
-    tool::Tools,
-    var::Vars,
+use {
+    crate::{
+        config::{Config, Verbose},
+        env,
+        log::Log,
+        tool::Tools,
+        var::Vars,
+    },
+    std::sync::OnceLock,
 };
+
+static MEI: OnceLock<Mei> = OnceLock::new();
 
 pub(crate) struct Mei {
     log: Log,
@@ -17,20 +22,21 @@ impl Mei {
     fn new() -> Self {
         env::rerun_if_env_changed();
         let conf = Config::load();
+        let vars = Vars::new();
 
         Self {
-            log: Log::new(conf.log),
-            vars: Vars::new(),
+            log: Log::new(conf.log, &vars),
+            vars,
             tools: conf.tools,
             verbose: conf.verbose,
         }
     }
 
+    pub fn try_get() -> Option<&'static Self> {
+        MEI.get()
+    }
+
     pub fn get() -> &'static Self {
-        use std::sync::OnceLock;
-
-        static MEI: OnceLock<Mei> = OnceLock::new();
-
         MEI.get_or_init(Self::new)
     }
 
