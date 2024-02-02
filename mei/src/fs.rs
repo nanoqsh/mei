@@ -7,6 +7,11 @@ use {
     },
 };
 
+/// Creates a new, empty directory at the provided path.
+///
+/// This function calls [`create_dir`](std::fs::create_dir) internally
+/// and therefore behaves the same, except for returning an error.
+/// This function writes to the log and panics if it fails.
 pub fn create_dir<P>(dir: P)
 where
     P: AsRef<Path>,
@@ -34,6 +39,11 @@ where
     create_dir_impl(dir.as_ref());
 }
 
+/// Copies the contents of one file to another.
+///
+/// This function calls [`copy`](std::fs::copy) internally
+/// and therefore behaves the same, except for returning an error.
+/// This function writes to the log and panics if it fails.
 pub fn copy<P, Q>(from: P, to: Q)
 where
     P: AsRef<Path>,
@@ -64,6 +74,13 @@ where
     copy_impl(from.as_ref(), to.as_ref());
 }
 
+/// Write a slice as the entire contents of a file.
+///
+/// This function calls [`write`](fn@std::fs::write) internally
+/// and therefore behaves the same, except for returning an error.
+/// It also automatically creates directories along the path if they don’t exist.
+///
+/// This function writes to the log and panics if it fails.
 pub fn write<P, C>(path: P, contents: C)
 where
     P: AsRef<Path>,
@@ -93,6 +110,12 @@ where
     write_impl(path.as_ref(), contents.as_ref());
 }
 
+/// Read the entire contents of a file into a string.
+///
+/// This function calls [`read_to_string`](std::fs::read_to_string) internally
+/// and therefore behaves the same, except for returning an error.
+///
+/// This function writes to the log and panics if it fails.
 pub fn read_to_string<P>(path: P) -> String
 where
     P: AsRef<Path>,

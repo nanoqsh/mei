@@ -7,23 +7,28 @@ use {
 };
 
 impl OptLevel {
+    /// Returns the current optimization level.
     pub fn current() -> Self {
         Mei::get().vars().opt_level
     }
 }
 
+/// Returns the target directory path.
 pub fn target_dir() -> &'static Path {
     &Mei::get().vars().target_dir
 }
 
+/// Returns the root directory path.
 pub fn root_dir() -> &'static Path {
     &Mei::get().vars().root_dir
 }
 
+/// Returns the bin directory path.
 pub fn bin_dir() -> &'static Path {
     &Mei::get().vars().bin_dir
 }
 
+/// Returns the mei working directory path.
 pub fn mei_dir() -> &'static Path {
     Mei::get().vars().make_mei_dir()
 }

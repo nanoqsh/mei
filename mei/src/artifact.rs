@@ -1,19 +1,19 @@
+/// Creates a new [artifact](Artifact).
 pub fn artifact<S>(name: S) -> Artifact
 where
     S: Into<Box<str>>,
 {
-    Artifact::new(name.into())
+    Artifact { name: name.into() }
 }
 
+/// The compilation artifact.
 pub struct Artifact {
     name: Box<str>,
 }
 
 impl Artifact {
-    fn new(name: Box<str>) -> Self {
-        Self { name }
-    }
-
+    /// Returns the name of the artifact
+    /// that was given to [`artifact`] function.
     pub fn name(&self) -> &str {
         &self.name
     }

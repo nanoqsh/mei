@@ -14,6 +14,7 @@ use {
     },
 };
 
+/// Creates a new [cargo](Cargo) object.
 pub fn cargo_build() -> Cargo<Build> {
     Cargo {
         profile: Profile::DEV,
@@ -35,6 +36,7 @@ pub(crate) fn cargo_install<'a>(name: &'a str, root: &'a Path) -> Cargo<Install<
     }
 }
 
+/// The object of a cargo build process.
 #[must_use]
 pub struct Cargo<M> {
     profile: Profile,
@@ -159,12 +161,12 @@ pub(crate) struct Install<'a> {
 }
 
 impl<'a> Cargo<Install<'a>> {
-    pub fn bin(&mut self, bin: &'a str) -> &mut Self {
+    pub(crate) fn bin(&mut self, bin: &'a str) -> &mut Self {
         self.mode.bin = Some(bin);
         self
     }
 
-    pub fn version(&mut self, version: &'a VersionReq) -> &mut Self {
+    pub(crate) fn version(&mut self, version: &'a VersionReq) -> &mut Self {
         self.mode.version = Some(version);
         self
     }

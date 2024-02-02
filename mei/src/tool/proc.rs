@@ -14,6 +14,7 @@ use {
     },
 };
 
+/// Creates a new [tool](Tool) object.
 pub fn tool<S>(name: S) -> Tool
 where
     S: AsRef<OsStr>,
@@ -21,10 +22,16 @@ where
     Tool(Command::new(name))
 }
 
+/// The tool object.
+///
+/// This is a wrapper around the [Command] type, but provides additional
+/// features such as auto installing a tool as a dependency.
 #[must_use]
 pub struct Tool(Command);
 
 impl Tool {
+    /// Returns the name of the tool
+    /// that was given to [`tool`] function.
     pub fn name(&self) -> Cow<str> {
         self.0.get_program().to_string_lossy()
     }

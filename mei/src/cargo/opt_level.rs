@@ -1,3 +1,4 @@
+/// The cargo optimization level.
 #[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
 pub enum OptLevel {
     N0,
@@ -9,6 +10,7 @@ pub enum OptLevel {
 }
 
 impl OptLevel {
+    /// Checks is current build optimized.
     pub fn is_optimized() -> bool {
         Self::current() > Self::N0
     }

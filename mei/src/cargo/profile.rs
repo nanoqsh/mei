@@ -1,3 +1,4 @@
+/// The cargo build profile.
 #[derive(Clone, Copy, PartialEq, Eq)]
 pub struct Profile(pub &'static str);
 

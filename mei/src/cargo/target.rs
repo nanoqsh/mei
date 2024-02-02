@@ -1,3 +1,4 @@
+/// The cargo build target.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub struct Target(pub &'static str);
 

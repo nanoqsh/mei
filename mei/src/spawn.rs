@@ -34,7 +34,9 @@ impl Info<'_> {
     }
 }
 
+/// The trait for process spawn.
 pub trait Spawn {
+    /// Spawns a new process.
     fn spawn(&mut self);
 }
 
