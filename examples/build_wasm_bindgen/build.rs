@@ -4,8 +4,9 @@ fn main() {
         mei::{OptLevel, Target},
     };
 
-    // TODO
-    println!("cargo:rerun-if-changed=.");
+    println!("cargo:rerun-if-changed=greet");
+    println!("cargo:rerun-if-changed=src");
+    println!("cargo:rerun-if-changed=templates");
 
     let mut make_greet = mei::cargo_build();
     make_greet
@@ -30,7 +31,7 @@ fn main() {
 
     let index = {
         #[derive(Template)]
-        #[template(path = "index.html")]
+        #[template(path = "index.html", escape = "none")]
         struct Index {
             js: String,
         }

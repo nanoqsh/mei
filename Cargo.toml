@@ -2,6 +2,9 @@
 resolver = "2"
 members = ["mei", "examples/build_wasm_bindgen", "examples/file_server"]
 
+[workspace.package]
+edition = "2021"
+
 [workspace.lints.clippy]
 use_self = "deny"
 unwrap_used = "deny"

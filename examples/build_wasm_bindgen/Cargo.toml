@@ -1,11 +1,11 @@
 [package]
 name = "build_wasm_bindgen"
 version = "0.1.0"
-edition = "2021"
+edition = { workspace = true }
 
 [package.metadata.mei]
 log = { console = true }
-verbose = true
+verbose = false
 
 [package.metadata.mei.tools]
 wasm-bindgen = { version = "0.2", crate = "wasm-bindgen-cli" }
